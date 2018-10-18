@@ -1,0 +1,6 @@
+[submodule "src/src/deps/beamfe"]
+	path = src/src/deps/beamfe
+	url = https://github.com/ricklupton/beamfe.git
+[submodule "src/deps/beamfe"]
+	path = src/deps/beamfe
+	url = https://github.com/ricklupton/beamfe.git
