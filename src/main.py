@@ -1,5 +1,5 @@
 import numpy as np
-
+import matplotlib.pyplot as plt
 import deps.beamfe.beamfe as FEM
 
 GSI = 9.81
@@ -10,7 +10,7 @@ def nodes(xStart,xEnd,number):
     n = (xEnd-xStart)/L
     return n, L, np.linspace(0,L,num=number)
 
-Nnodes =50
+Nnodes =2
 root = np.array([0,0,0])
 tip = np.array([0,1,0])
 direction, length, nodes = nodes(root,tip,Nnodes)
@@ -56,4 +56,16 @@ prob = FEM.BeamFE(nodes,density,EA,EIy,EIz)
 
 prob.set_boundary_conditions('C','F')
 prob.set_dofs([True,True,True,False,False,False])
-prob.distribute_load(load)
+
+x, _ = prob.static_deflection(prob.distribute_load(load))
+
+δ = FEM.deleave(x)
+print(x)
+print(x[2::6])
+disp = {'x' :  δ[0,:],
+        'y' :  δ[1,:],
+        'z' :  δ[2,:],
+        'rx' : δ[3,:],
+        'ry' : δ[4,:],
+        'rz' : δ[5,:]}
+plt.show()
