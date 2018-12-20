@@ -1,0 +1,25 @@
+Wing
+#Mach
+0.0
+#iYsym iZsym Zsym
+0 0 0.0
+#Sref Cref Bref
+0.196 0.196 1.4
+#Xref Yref Zref
+0 0 0
+SURFACE
+Wing
+#NChordwise ChordSpacing NSpanwise SpanSpacing
+15 1 15 1
+YDUPLICATE
+0.0
+SECTION
+#Xle Yle Zle Chord Angle
+0.045 0 0 0.18 0
+AFILE
+../in/6043.dat
+SECTION
+#Xle Yle Zle Chord Angle
+0.025 0.7 0 0.1 0
+AFILE
+../in/6043.dat
