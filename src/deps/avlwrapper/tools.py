@@ -2,7 +2,7 @@
 
 from itertools import product
 
-from avlwrapper import Case
+from . import Case
 
 
 class ParameterSweep(object):
