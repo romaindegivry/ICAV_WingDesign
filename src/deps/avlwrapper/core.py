@@ -237,7 +237,12 @@ class Session(object):
     def __del__(self):
         if self._temp_dir is not None:
             self._temp_dir.cleanup()
-
+        #Change by Romain Clement de Givry on 26/01/2019
+        #closes the dev/null binding of stdout
+        #begin
+        if self._stdout is not None:
+            self._stdout.close()
+        #end
     @property
     def temp_dir(self):
         if self._temp_dir is None:
@@ -379,15 +384,15 @@ class Session(object):
             self._calculated = True
 
     def _get_avl_process(self):
-        stdin = subprocess.PIPE
-        stdout = open(os.devnull, 'w') if not self.config[
+        self._stdin = subprocess.PIPE
+        self._stdout = open(os.devnull, 'w') if not self.config[
             'show_stdout'] else None
         working_dir = self.temp_dir.name
 
         # Buffer size = 0 required for direct stdin/stdout access
         return subprocess.Popen(args=[self.config['avl_bin']],
-                                stdin=stdin,
-                                stdout=stdout,
+                                stdin=self._stdin,
+                                stdout=self._stdout,
                                 bufsize=0,
                                 cwd=working_dir)
 
