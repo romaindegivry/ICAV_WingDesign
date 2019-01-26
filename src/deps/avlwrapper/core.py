@@ -361,7 +361,6 @@ class Session(object):
         return results
 
     def _run_analysis(self, run_keys=None):
-
         if not self._calculated:
             self._write_geometry()
             self._copy_airfoils()

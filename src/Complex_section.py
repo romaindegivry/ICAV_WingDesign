@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, Wedge, Polygon
 from matplotlib.collections import PatchCollection
 
-from avlwrapper import (Geometry, Surface, Section,  FileAirfoil, Control,
+from deps.avlwrapper import (Geometry, Surface, Section,  FileAirfoil, Control,
                                        Point, Spacing, Session, Case, Parameter,
                                        ParameterSweep, ProfileDrag)
 gSI = 9.81
@@ -70,8 +70,8 @@ def analysis(c=0.25, cbeam = 0.24, stripT=0.5e-3,beamT=3e-3,ntop=ntop,nbot=nbot,
     stripCentroid = (np.average(topStrip,axis=0) + np.average(botStrip,axis=0))/2
 
     #calculate main postions
-    cstart = cbeam -beamWidth/c/2 
-    cend = cbeam +beamWidth/c/2 
+    cstart = cbeam -beamWidth/c/2
+    cend = cbeam +beamWidth/c/2
     cspace = np.linspace(cstart,cend)
 
     beamT = 3e-3
@@ -83,8 +83,8 @@ def analysis(c=0.25, cbeam = 0.24, stripT=0.5e-3,beamT=3e-3,ntop=ntop,nbot=nbot,
 
 
     #calculating the second moment of area of the structural form
-    Is =(I(topbeam-centroid,beamT) + 
-        I(botbeam-centroid,beamT) + 
+    Is =(I(topbeam-centroid,beamT) +
+        I(botbeam-centroid,beamT) +
         I(topStrip-centroid,stripT) +
         I(topStrip-centroid,stripT))
 
@@ -119,7 +119,7 @@ def analysis(c=0.25, cbeam = 0.24, stripT=0.5e-3,beamT=3e-3,ntop=ntop,nbot=nbot,
                 "stripCentroid" : stripCentroid,
                 "beamCentroid" : beamCentroid}
         return results, debug
-    
+
     return results
 c= 0.3
 res, ana = analysis(c=c,stripWidth=3e-3, debug=True)
@@ -149,7 +149,7 @@ ax.plot(topStrip[:,0]/c,topStrip[:,1]/c,'k-')
 ax.plot(botStrip[:,0]/c,botStrip[:,1]/c,'k-')
 
 #plot filled sections
-patches = []; 
+patches = [];
 patches.append(Polygon(np.vstack([topStrip,botStrip[::-1,:]])/c,True))
 
 #centroids
@@ -203,7 +203,7 @@ def analyseWing(c=0.25, cbeam = 0.24, stripT=0.5e-3,beamT=3e-3,ntop=ntop,nbot=nb
              beamWidth = 3e-2, stripWidth = 3e-3, debug=False):
     #do some checks
     assert(type(c) == np.ndarray)
-    
+
     #convert constants to np.ndarray
     shape = c.shape
     cbeam = cbeam * np.ones(shape)
@@ -263,6 +263,8 @@ geometry = Geometry(name="Wing",
                          surfaces=[wingSurface])
 cruise_case = Case(name='Cruise', alpha=+2)
 session = Session(geometry=geometry, cases=[cruise_case])
+session._run_analysis()
+session.show_geometry()
 results = session.get_results()
 session._write_geometry(name="avl_input.avl")
 
@@ -359,7 +361,7 @@ xMoments = np.zeros(xs.shape)
 
 for i in range(len(xs)):
     xMoments[i] = np.trapz(dloadz[i:]*xs[i:],xs[i:])
-    
+
 #compute the stresses:
 #we will extract two arrays of stresses (compressive and tensile)
 sigTens = ymax*xMoments/Ixx
@@ -436,4 +438,3 @@ ax2.set_xlabel(r"Distance from the root [m]")
 ax2.grid()
 fig.set_size_inches((15,12))
 plt.show()
-
