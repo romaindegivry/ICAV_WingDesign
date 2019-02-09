@@ -257,7 +257,7 @@ wingSurface = Surface(name="Wing",
 #fuselage = Body("fuselage",10,0.1)
 geometry = Geometry(name="Wing",
                          reference_area=xtip*(croot+ctip),
-                         reference_chord=Sref,
+                         reference_chord=(ctip+croot),
                          reference_span=xtip*2,
                          reference_point=Point(0, 0, 0),
                          surfaces=[wingSurface])
@@ -273,7 +273,7 @@ session._write_geometry(name="avl_input.avl")
 # In[8]:
 import json
 with open('out2.json', 'w') as f:
-    f.write(json.dumps(results))
+    f.write(json.dumps(results, indent = 4))
 
 CL = results['Cruise']['SurfaceForces']['Wing']['CL']
 CD = results['Cruise']['SurfaceForces']['Wing']['CD']

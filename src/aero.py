@@ -1,7 +1,7 @@
 import numpy as np
 from deps.avlwrapper import (Geometry, Surface, Section,  FileAirfoil, Control,
                                        Point, Spacing, Session, Case, Parameter,
-                                       ParameterSweep, ProfileDrag)
+                                       ParameterSweep, ProfileDrag,Vector)
 
 #TODO: Build better tests
 #TODO: Better comments
@@ -22,24 +22,37 @@ class Wing:
         self.rootSection = None
         self.tipSection = None
         self.surface = None
+        self.control = None
 
-    def autoSections(self, croot, ctip, semispan, airfoilLoc,
+    def set_control(self,gain=1.0,xc_hinge=0.75):
+        ailControl = {"gain" : gain, "x_hinge" : xc_hinge}
+        aileron_control = Control(name="aileron",duplicate_sign=-1,
+                                  hinge_vector=Vector(0,1,0),**ailControl)
+        self.control=[aileron_control]
+        if self.rootSection != None:
+            raise Warning("Wing geometry might already be defined")
+
+    def autoSections(self, croot, ctip, semispan, airfoilLoc, twist = 0,
                      rootPos = np.zeros((3,1)),sectionKwargs={}):
         """
         rootPos: is the absolute position of the root QUARTER CHORD point
         sectionKwargs: is used to pass keyword arguments to alv,
             check deps.avlwrapper.geometry.Section for details.
             Keyword airfoil will be overwritten.
+
+        give the twist in angle difference between the tip and root
         """
         #read Airfoil
         AF = FileAirfoil(airfoilLoc)
         airfoil = {"airfoil" : AF}
         #build root
         rootLE = Point(rootPos[0,0]+croot/4.,rootPos[1,0],rootPos[2,0])
-        self.rootSection = Section(rootLE,croot,**dict(sectionKwargs,**airfoil))
+        self.rootSection = Section(rootLE,croot,angle=0.,controls = self.control,
+                                   **dict(sectionKwargs,**airfoil))
         #build tip
         tipLE = Point(rootPos[0,0]+ctip/4.,rootPos[1,0]+semispan,rootPos[2,0])
-        self.tipSection = Section(tipLE, ctip,**dict(sectionKwargs,**airfoil))
+        self.tipSection = Section(tipLE, ctip,angle=twist,controls = self.control,
+                                   **dict(sectionKwargs,**airfoil))
 
 
     def autoWing(self,n_spanwise,n_chordwise,name="Wing"):
@@ -78,6 +91,15 @@ class HTail:
         self.rootSection = None
         self.tipSection = None
         self.surface = None
+        self.control = None
+
+    def set_control(self,gain=1.0,xc_hinge=0.0):
+        ailControl = {"gain" : gain, "x_hinge" : xc_hinge}
+        elevator_control = Control(name="elevator",duplicate_sign=1,
+                                  hinge_vector=Vector(0,1,0),**ailControl)
+        self.control=[elevator_control]
+        if self.rootSection != None:
+            raise Warning("Htail geometry might already be defined")
 
     def autoSections(self, croot, ctip, semispan, airfoilLoc,
                      rootPos = np.zeros((3,1)),sectionKwargs={}):
@@ -92,10 +114,12 @@ class HTail:
         airfoil = {"airfoil" : AF}
         #build root
         rootLE = Point(rootPos[0,0]+croot/4.,rootPos[1,0],rootPos[2,0])
-        self.rootSection = Section(rootLE,croot,**dict(sectionKwargs,**airfoil))
+        self.rootSection = Section(rootLE,croot,\
+                        controls=self.control,**dict(sectionKwargs,**airfoil))
         #build tip
         tipLE = Point(rootPos[0,0]+ctip/4.,rootPos[1,0]+semispan,rootPos[2,0])
-        self.tipSection = Section(tipLE, ctip,**dict(sectionKwargs,**airfoil))
+        self.tipSection = Section(tipLE, ctip,\
+                        controls=self.control,**dict(sectionKwargs,**airfoil))
 
 
     def autoHTail(self,n_spanwise,n_chordwise,name="HTail"):
@@ -135,6 +159,15 @@ class VTail:
         self.rootSection = None
         self.tipSection = None
         self.surface = None
+        self.control = None
+
+    def set_control(self,gain=1.0,xc_hinge=0.75):
+        ailControl = {"gain" : gain, "x_hinge" : xc_hinge}
+        rudder_control = Control(name="rudder",duplicate_sign=1,
+                                  hinge_vector=Vector(0,0,1),**ailControl)
+        self.control=[rudder_control]
+        if self.rootSection != None:
+            raise Warning("Wing geometry might already be defined")
 
     def autoSections(self, croot, ctip, span, airfoilLoc,
                      rootPos = np.zeros((3,1)),sectionKwargs={}):
@@ -149,10 +182,12 @@ class VTail:
         airfoil = {"airfoil" : AF}
         #build root
         rootLE = Point(rootPos[0,0]+croot/4.,rootPos[1,0],rootPos[2,0])
-        self.rootSection = Section(rootLE,croot,**dict(sectionKwargs,**airfoil))
+        self.rootSection = Section(rootLE,croot,\
+                        controls=self.control,**dict(sectionKwargs,**airfoil))
         #build tip
         tipLE = Point(rootPos[0,0]+ctip/4.,rootPos[1,0],rootPos[2,0]+span)
-        self.tipSection = Section(tipLE, ctip,**dict(sectionKwargs,**airfoil))
+        self.tipSection = Section(tipLE, ctip,\
+                        controls=self.control,**dict(sectionKwargs,**airfoil))
 
 
     def autoVTail(self,n_spanwise,n_chordwise,name="HTail"):
@@ -218,6 +253,12 @@ class Aero:
         if vtail.surface == None:
             raise ValueError("Undefined vtail surface, maybe run autoVTail")
         self.surfaces["vtail"] = vtail.surface
+
+    def define_body(yloc = 0.25,left=True,right=True):
+        """
+        Give yloc as the distance from the symetry plane in meters
+        """
+        
 
     def build_geometry(self,Aref,cref,bref):
         """Create the geometry for the case"""

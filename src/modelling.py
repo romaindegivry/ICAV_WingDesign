@@ -41,6 +41,7 @@ class SimpleUAV(Model):
                            span = 2.,
                            wAngle = 0.0,
                            wAirfoil = "",
+                           wtwist = 0.,
                            htRChord= 0.2,
                            htTChord= 0.1,
                            htSpan = 1.,
@@ -55,7 +56,8 @@ class SimpleUAV(Model):
                            n_chordwise = 15,
                            n_spanwise = 15,
                            offset=np.zeros((3,1))):
-        """Creates an aircraft model at offset"""
+        """Creates an aircraft model at offset
+        TODO: add control surface bindings"""
         #mean aerodynamic chord
         self.MAC = (wRChord + wTChord)/2.
         self.c = self.MAC
@@ -67,18 +69,22 @@ class SimpleUAV(Model):
         self.Aref = span*self.MAC
         #Wing
         self._wing = ae.Wing()
+        self._wing.set_control()
         self._wing.autoSections(wRChord,wTChord,span/2,
-                                wAirfoil,rootPos =offset)
+                                wAirfoil,twist=wtwist,rootPos =offset)
+
         self._wing.autoWing(n_chordwise,n_spanwise)
 
         #Horizontal tail
         self._htail = ae.HTail()
+        self._htail.set_control()
         self._htail.autoSections(htRChord, htTChord, htSpan/2, htAirfoil,\
-                            rootPos = htRLoc+offset)
+                                 rootPos = htRLoc+offset)
         self._htail.autoHTail(n_chordwise,n_spanwise)
 
         #vertical tail
         self._vtail = ae.VTail()
+        self._vtail.set_control()
         self._vtail.autoSections(vtRChord, vtTChord, vtHeight, vtAirfoil,\
                             rootPos = vtRLoc+offset)
         self._vtail.autoVTail(n_chordwise,n_spanwise)

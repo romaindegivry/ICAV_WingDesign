@@ -21,7 +21,8 @@ wingOptions = {"wRChord" : 0.3,
                "wTChord" : 0.15,
                "span" : 2.,
                "wAngle" : 0.,
-               "wAirfoil" : airfoil}
+               "wAirfoil" : airfoil,
+               "wtwist" : -3.}
 
 htOptions = {"htRChord" : 0.2,
                "htTChord" : 0.1,
@@ -44,4 +45,5 @@ model.aerodynamics(**wingOptions,**htOptions,**vtOptions,**meshOptions)
 model._aero.add_case(name='cruise',alpha=+2)
 model._aero.run()
 model._aero._session.show_geometry()
+model._aero._session._write_geometry("avl_input.avl")
 #begin by importing the airfoil
